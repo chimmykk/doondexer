@@ -65,6 +65,8 @@ async function processBlock(provider, blockNum) {
             try {
                 // Fetch the full transaction object
                 const tx = await provider.getTransaction(txHash);
+                // Fetch transaction receipt for status
+                const receipt = await provider.getTransactionReceipt(txHash);
 
                 if (!tx) {
                     console.log(`   [WARNING] Could not fetch transaction ${txHash}`);
@@ -72,6 +74,16 @@ async function processBlock(provider, blockNum) {
                 }
 
                 const inputData = tx.data || "0x";
+
+                // Determine status
+                let status = "Unknown";
+                if (receipt) {
+                    if (receipt.status === 1) {
+                        status = "Success";
+                    } else if (receipt.status === 0) {
+                        status = "Fail";
+                    }
+                }
 
                 transactions.push({
                     hash: tx.hash,
@@ -84,7 +96,8 @@ async function processBlock(provider, blockNum) {
                     input: inputData.length > 10 ? inputData.substring(0, 10) + "..." : inputData,
                     nonce: tx.nonce !== undefined ? tx.nonce : 0,
                     type: tx.type !== undefined ? tx.type : null,
-                    chainId: tx.chainId ? tx.chainId.toString() : "unknown"
+                    chainId: tx.chainId ? tx.chainId.toString() : "unknown",
+                    status: status
                 });
             } catch (txError) {
                 console.error(`   [ERROR] Error fetching transaction ${txHash}: ${txError.message}`);
