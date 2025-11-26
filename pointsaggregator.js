@@ -10,7 +10,11 @@ const TRANSACTIONS_DIR = path.join(__dirname, 'transactions');
 
 // Points configuration
 const BASE_POINTS_PER_TXN = 100;
-const NFT_HOLDER_MULTIPLIER = 1.1;
+const NFT_MULTIPLIERS = {
+    0: 1.0,   // No NFTs
+    1: 1.1,   // 1 NFT
+    2: 1.3    // 2+ NFTs
+};
 
 // ERC721 ABI - only the functions we need
 const ERC721_ABI = [
@@ -18,7 +22,7 @@ const ERC721_ABI = [
 ];
 
 /**
- * Check if an address holds any NFTs from the collection
+ * Check NFT balance for an address and return the count
  */
 async function checkNFTBalance(address) {
     try {
@@ -36,10 +40,10 @@ async function checkNFTBalance(address) {
 
         console.log(`  ✓ NFT Balance: ${balanceNumber}`);
 
-        return balanceNumber > 0;
+        return balanceNumber;
     } catch (error) {
         console.error('  ✗ Error checking NFT balance:', error.message);
-        return false;
+        return 0;
     }
 }
 
@@ -122,30 +126,39 @@ async function calculatePoints(address) {
     console.log('='.repeat(80));
 
     // Check NFT holdings
-    const holdsNFT = await checkNFTBalance(address);
+    const nftBalance = await checkNFTBalance(address);
 
     // Count successful transactions
     const txnCount = countSuccessfulTransactions(address);
 
+    // Calculate multiplier based on NFT holdings
+    let multiplier;
+    if (nftBalance === 0) {
+        multiplier = NFT_MULTIPLIERS[0];
+    } else if (nftBalance === 1) {
+        multiplier = NFT_MULTIPLIERS[1];
+    } else {
+        multiplier = NFT_MULTIPLIERS[2];
+    }
+
     // Calculate points
     const basePoints = txnCount * BASE_POINTS_PER_TXN;
-    const multiplier = holdsNFT ? NFT_HOLDER_MULTIPLIER : 1.0;
     const totalPoints = Math.floor(basePoints * multiplier);
 
     // Display results
     console.log('\n' + '='.repeat(80));
     console.log('RESULTS');
     console.log('='.repeat(80));
-    console.log(`NFT Holder: ${holdsNFT ? 'YES ✓' : 'NO ✗'}`);
-    console.log(`Multiplier: ${multiplier}x`);
+    console.log(`NFT Balance: ${nftBalance} ${nftBalance > 0 ? '✓' : '✗'}`);
+    console.log(`Multiplier: ${multiplier}x ${nftBalance >= 2 ? '(2+ NFTs bonus!)' : nftBalance === 1 ? '(1 NFT bonus)' : ''}`);
     console.log(`Successful Transactions: ${txnCount}`);
     console.log(`Base Points: ${basePoints} (${txnCount} txns × ${BASE_POINTS_PER_TXN} points)`);
-    console.log(`Total Points: ${totalPoints} ${holdsNFT ? '(with NFT bonus)' : ''}`);
+    console.log(`Total Points: ${totalPoints} ${nftBalance > 0 ? '(with NFT bonus)' : ''}`);
     console.log('='.repeat(80));
 
     return {
         address,
-        holdsNFT,
+        nftBalance,
         multiplier,
         txnCount,
         basePoints,
