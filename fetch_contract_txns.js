@@ -8,7 +8,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
 
-const RPC_URL = "https://rpc4.monad.xyz";
+const RPC_URL = "https://rpc3.monad.xyz";
 const PROGRESS_FILE = "indexer_progress.json";
 const OUTPUT_DIR = "transactions";
 
