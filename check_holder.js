@@ -59,10 +59,7 @@ async function fetchNFTBalance() {
             for (let i = 0; i < balanceNumber; i++) {
                 const tokenId = await nftContract.tokenOfOwnerByIndex(USER_ADDRESS, i);
                 tokenIds.push(tokenId.toString());
-
-                if ((i + 1) % 10 === 0 || (i + 1) === balanceNumber) {
-                    console.log(`  Found ${i + 1}/${balanceNumber} tokens...`);
-                }
+                console.log(`  ✓ Token #${i + 1}: ID ${tokenId.toString()}`);
             }
             method1Success = true;
             console.log('Method 1 successful!');
@@ -95,10 +92,7 @@ async function fetchNFTBalance() {
 
                     if (owner.toLowerCase() === USER_ADDRESS.toLowerCase()) {
                         tokenIds.push(id.toString());
-
-                        if (tokenIds.length % 5 === 0 || tokenIds.length === balanceNumber) {
-                            console.log(`  Found ${tokenIds.length}/${balanceNumber} owned tokens (checked up to ID ${id})...`);
-                        }
+                        console.log(`  ✓ Token #${tokenIds.length}: ID ${id}`);
                     }
                 } catch (error) {
                     // Token doesn't exist or is burned, continue
@@ -113,9 +107,15 @@ async function fetchNFTBalance() {
         }
 
         console.log('');
-        console.log('Results:');
-        console.log(`   Balance: ${balanceNumber} NFTs`);
-        console.log(`   Token IDs: [${tokenIds.join(', ')}]`);
+        console.log('='.repeat(80));
+        console.log('RESULTS');
+        console.log('='.repeat(80));
+        console.log(`NFT Balance: ${balanceNumber}`);
+        console.log(`Token IDs Owned:`);
+        tokenIds.forEach((tokenId, index) => {
+            console.log(`  ${index + 1}. Token ID: ${tokenId}`);
+        });
+        console.log('='.repeat(80));
 
         return {
             balance: balanceNumber,
