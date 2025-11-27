@@ -94,7 +94,10 @@ function countSuccessfulTransactions(address) {
                         matchingTxns.push({
                             hash: txn.hash,
                             blockNumber: txn.blockNumber,
-                            value: txn.value
+                            value: txn.value,
+                            valueInEth: ethers.formatEther(txn.value || '0'),
+                            to: TARGET_CONTRACT,
+                            status: 'Success'
                         });
                     }
                 }
@@ -114,7 +117,34 @@ function countSuccessfulTransactions(address) {
         });
     }
 
-    return successfulTxnCount;
+    return { count: successfulTxnCount, transactions: matchingTxns };
+}
+
+/**
+ * Save results to JSON file
+ */
+function saveResultsToJSON(results) {
+    // Extract last 26 characters from address (removing '0x' prefix)
+    const shortId = results.address.slice(-26);
+    const filename = path.join(__dirname, `${shortId}.json`);
+
+    const jsonData = {
+        address: results.address,
+        shortId: shortId,
+        nftBalance: results.nftBalance,
+        multiplier: results.multiplier,
+        multiplierReason: results.nftBalance >= 2 ? '2+ NFTs bonus' : results.nftBalance === 1 ? '1 NFT bonus' : 'No NFTs',
+        successfulTransactions: results.txnCount,
+        basePoints: results.basePoints,
+        totalPoints: results.totalPoints,
+        pointsPerTransaction: BASE_POINTS_PER_TXN,
+        transactions: results.transactions,
+        lastUpdated: new Date().toISOString()
+    };
+
+    fs.writeFileSync(filename, JSON.stringify(jsonData, null, 2));
+    console.log(`\n✓ Results saved to: ${filename}`);
+    return filename;
 }
 
 /**
@@ -129,7 +159,9 @@ async function calculatePoints(address) {
     const nftBalance = await checkNFTBalance(address);
 
     // Count successful transactions
-    const txnCount = countSuccessfulTransactions(address);
+    const txnResult = countSuccessfulTransactions(address);
+    const txnCount = txnResult.count;
+    const transactions = txnResult.transactions;
 
     // Calculate multiplier based on NFT holdings
     let multiplier;
@@ -162,7 +194,8 @@ async function calculatePoints(address) {
         multiplier,
         txnCount,
         basePoints,
-        totalPoints
+        totalPoints,
+        transactions
     };
 }
 
@@ -186,6 +219,8 @@ if (require.main === module) {
 
     calculatePoints(address)
         .then(result => {
+            // Save results to JSON file
+            saveResultsToJSON(result);
             console.log('\nDone!');
             process.exit(0);
         })

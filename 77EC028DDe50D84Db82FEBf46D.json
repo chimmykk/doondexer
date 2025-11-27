@@ -1,0 +1,30 @@
+{
+  "address": "0x84A7818F15D42e77EC028DDe50D84Db82FEBf46D",
+  "shortId": "77EC028DDe50D84Db82FEBf46D",
+  "nftBalance": 2,
+  "multiplier": 1.3,
+  "multiplierReason": "2+ NFTs bonus",
+  "successfulTransactions": 2,
+  "basePoints": 200,
+  "totalPoints": 260,
+  "pointsPerTransaction": 100,
+  "transactions": [
+    {
+      "hash": "0x72210e8ccb9d82c8294d1bf9cb9f8094d655842fdc4f115520eaa40fdb528cfc",
+      "blockNumber": 38086011,
+      "value": "1000000000000000000",
+      "valueInEth": "1.0",
+      "to": "0xcA5C2a5688f6C824d029F3A23B75082c5f75b442",
+      "status": "Success"
+    },
+    {
+      "hash": "0xcbd129923955345fdbfa39923467b52796aac07a8c23efed07d6cbb4fa835cbb",
+      "blockNumber": 38104033,
+      "value": "1000000000000000000",
+      "valueInEth": "1.0",
+      "to": "0xcA5C2a5688f6C824d029F3A23B75082c5f75b442",
+      "status": "Success"
+    }
+  ],
+  "lastUpdated": "2025-11-27T08:48:23.042Z"
+}
